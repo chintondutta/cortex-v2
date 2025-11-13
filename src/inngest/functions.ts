@@ -128,7 +128,7 @@ export const codeAgentFunction = inngest.createFunction(
       const network = createNetwork<AgenctState>({
         name: "code-agent-network",
         agents: [codeAgent],
-        maxIter: 15,
+        maxIter: 8, // Reduced from 15 to 8
         router: async ({network}) => {
           const summary = network.state.data.summary;
           if(summary){
@@ -153,6 +153,7 @@ export const codeAgentFunction = inngest.createFunction(
         if(isError){
           return await prisma.message.create({
             data: {
+              projectId: event.data.projectId,
               content: "Something went wrong, Please try again.",
               role: "ASSISTANT",
               type: "ERROR",
@@ -161,6 +162,7 @@ export const codeAgentFunction = inngest.createFunction(
         }
         return await prisma.message.create({
           data: {
+            projectId: event.data.projectId,
             content: result.state.data.summary,
             role: "ASSISTANT",
             type: "RESULT",
