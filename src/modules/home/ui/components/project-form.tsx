@@ -10,18 +10,14 @@ import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {useTRPC} from "@/trpc/client";
 import {Form, FormField} from "@/components/ui/form";
-
-
-
-interface Props {
-    projectId: string;
-};
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
     value: z.string().min(1, {message: "Value is required"}).max(10000, {message: "Value is too long"}),
 });
 
-export const MessageForm = ({projectId}: Props) => {
+export const ProjectForm = () => {
+    const router = useRouter();
     const trpc = useTRPC();
     const queryClient = useQueryClient();
     const form = useForm<z.infer<typeof formSchema>>({
@@ -31,10 +27,10 @@ export const MessageForm = ({projectId}: Props) => {
         },
     });
 
-    const createMessage = useMutation(trpc.messages.create.mutationOptions({
+    const createProject = useMutation(trpc.projects.create.mutationOptions({
         onSuccess: (data) => {
-            form.reset();
-            queryClient.invalidateQueries(trpc.messages.getMany.queryOptions({projectId}),);
+            queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
+            router.push(`/projects/${data.id}`);
             // TODO: Invalidate usage status
         },
         onError: (error) => {
@@ -44,23 +40,20 @@ export const MessageForm = ({projectId}: Props) => {
     }));
 
     const onSubmit = async (values: z.infer<typeof formSchema>) =>{
-        await createMessage.mutateAsync({
+        await createProject.mutateAsync({
             value: values.value,
-            projectId,
         });
     }
 
-    const isPending = createMessage.isPending;
+    const isPending = createProject.isPending;
     const isDisabled = isPending || form.formState.isValid;
     const [isFocussed, setIsFocussed] = useState(false);
-    const showUsage = false;
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}
                   className={cn("relative border p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all",
                                 isFocussed && "shadow-xs",
-                                showUsage && "rounded-t-none",
 
                   )}
             >
@@ -106,6 +99,9 @@ export const MessageForm = ({projectId}: Props) => {
                     </Button>
                 </div>
             </form>
+            <div>
+                
+            </div>
         </Form>
     );
 };

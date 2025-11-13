@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { Fragment } from "@/generated/prisma/client";
 import { MessageLoading } from "./message-loading";
 
+
 interface Props {
     projectId: string;
     activeFragment: Fragment | null;
@@ -15,13 +16,15 @@ interface Props {
 export const MessagesContainer = ({projectId, activeFragment, setActiveFragment}: Props) => {
     const trpc = useTRPC();
     const bottomRef = useRef<HTMLDivElement>(null);
+    const lastAssistantMessageIdRef = useRef<string | null>(null);
     const {data: messages} = useSuspenseQuery(trpc.messages.getMany.queryOptions({projectId: projectId},{refetchInterval: 5000}));
-    // useEffect(() => {
-    //     const lastAssistantMessagewithFragment = messages.findLast((message) => message.role === "ASSISTANT" && message.fragment);
-    //     if(lastAssistantMessagewithFragment && lastAssistantMessagewithFragment.fragment){
-    //         setActiveFragment(lastAssistantMessagewithFragment.fragment);
-    //     }
-    // }, [messages, setActiveFragment]);
+    useEffect(() => {
+        const lastAssistantMessage = messages.findLast((message) => message.role === "ASSISTANT");
+        if(lastAssistantMessage?.fragment && lastAssistantMessage.id !== lastAssistantMessageIdRef.current){
+            lastAssistantMessageIdRef.current = lastAssistantMessage.id;
+            setActiveFragment(lastAssistantMessage.fragment);
+        }
+    }, [messages, setActiveFragment]);
     useEffect(() => {
         bottomRef.current?.scrollIntoView();
     }, [messages.length]);
