@@ -27,7 +27,7 @@ const Page = () => {
         <ProjectForm />
       </div>
     </section>
-     <ProjectsList />
+     
     </div>
   );
 }

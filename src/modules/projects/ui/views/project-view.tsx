@@ -9,6 +9,7 @@ import { Fragment } from "@/generated/prisma/client";
 import { useState } from "react";
 import { ProjectHeader } from "../components/project-header";
 import { FragmentWeb } from "../components/fragment-web";
+import {UserControl} from "@/components/user-control";
 
 interface Props {
     projectId: string;
@@ -30,6 +31,7 @@ export const ProjectView = ({projectId}: Props) => {
                            setActiveFragment={setActiveFragment}
                         />
                     </Suspense>
+                    <UserControl showName={true} />
                 </ResizablePanel>
                 <ResizableHandle className="hover:bg-primary transition-colors"/>
                 <ResizablePanel defaultSize={65} minSize={50}>
