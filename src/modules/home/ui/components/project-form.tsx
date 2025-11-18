@@ -12,6 +12,7 @@ import {useTRPC} from "@/trpc/client";
 import {Form, FormField} from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import {useClerk} from "@clerk/nextjs";
+import { PROJECT_TEMPLATES } from "../../constants";
 
 const formSchema = z.object({
     value: z.string().min(1, {message: "Value is required"}).max(10000, {message: "Value is too long"}),
@@ -52,8 +53,14 @@ export const ProjectForm = () => {
     }
 
     const isPending = createProject.isPending;
-    const isDisabled = isPending || form.formState.isValid;
+    const isDisabled = isPending || !form.formState.isValid; // Fixed: should be !form.formState.isValid
     const [isFocussed, setIsFocussed] = useState(false);
+
+    const handleTemplateClick = (prompt: string) => {
+        if (isPending) return;
+        form.setValue("value", prompt);
+        // Removed auto-submit - user can now review and submit manually
+    };
 
     return (
         <Form {...form}>
@@ -105,8 +112,20 @@ export const ProjectForm = () => {
                     </Button>
                 </div>
             </form>
-            <div>
-                
+            <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                {PROJECT_TEMPLATES.map((template) => (
+                    <Button 
+                        key={template.title} 
+                        variant="outline" 
+                        size="sm" 
+                        className="bg-white dark:bg-sidebar" 
+                        onClick={() => handleTemplateClick(template.prompt)}
+                        disabled={isPending}
+                    >
+                        <span className="mr-1">{template.emoji}</span>
+                        {template.title}
+                    </Button>
+                ))}
             </div>
         </Form>
     );
