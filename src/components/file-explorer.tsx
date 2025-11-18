@@ -85,6 +85,7 @@ export const FileExplorer = ({
         const fileKeys = Object.keys(files);
         return fileKeys.length > 0 ? fileKeys[0] : null;
     });
+    const [copied, setCopied] = useState(false);
 
     const treeData = useMemo(() => {
         return convertFilesToTreeItems(files);
@@ -98,9 +99,23 @@ export const FileExplorer = ({
         }
     }, [files]);
 
+    const handleCopy = useCallback(async () => {
+        if (!selectedFile || !files[selectedFile]) return;
+        
+        try {
+            await navigator.clipboard.writeText(files[selectedFile]);
+            setCopied(true);
+            setTimeout(() => {
+                setCopied(false);
+            }, 2000);
+        } catch (error) {
+            console.error("Failed to copy to clipboard:", error);
+        }
+    }, [selectedFile, files]);
+
    return (
     <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={30} minSize={30} className="bg-sidebar">
+        <ResizablePanel defaultSize={30} minSize={15} className="bg-sidebar">
             <TreeView 
                 data={treeData}
                 value={selectedFile}
@@ -113,9 +128,9 @@ export const FileExplorer = ({
                 <div className="h-full w-full flex flex-col">
                     <div className="border-b bg-sidebar px-4 py-2 flex justify-between items-center gap-x-2">
                         <FileBreadcrumb filePath={selectedFile} />
-                        <Hint text="Copy to clipboard" side="bottom">
-                            <Button variant="outline" size="icon" className="ml-auto" onClick={() => {}} disabled={false}>
-                                <CopyIcon />
+                        <Hint text={copied ? "Copied!" : "Copy to clipboard"} side="bottom">
+                            <Button variant="outline" size="icon" className="ml-auto" onClick={handleCopy} disabled={false}>
+                                {copied ? <CopyCheckIcon /> : <CopyIcon />}
                             </Button>
                         </Hint>
                     </div>
