@@ -1,7 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { MessagesContainer } from "../components/messages-container";
 import { Suspense } from "react";
@@ -11,9 +9,7 @@ import { useState } from "react";
 import { ProjectHeader } from "../components/project-header";
 import { FragmentWeb } from "../components/fragment-web";
 import {UserControl} from "@/components/user-control";
-import { EyeIcon, CodeIcon, CrownIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { EyeIcon, CodeIcon } from "lucide-react";
 import { FileExplorer } from "@/components/file-explorer";
 import { ErrorBoundary } from "react-error-boundary";
 

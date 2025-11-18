@@ -5,7 +5,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import {z} from "zod";
 import {toast} from "sonner";
 import {ArrowUpIcon, Loader2Icon} from "lucide-react";
-import {useMutation, useQueryClient, useQuery} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {useTRPC} from "@/trpc/client";

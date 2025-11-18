@@ -5,7 +5,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import {z} from "zod";
 import {toast} from "sonner";
 import {ArrowUpIcon, Loader2Icon} from "lucide-react";
-import {useMutation, useQueryClient, useQuery} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {useTRPC} from "@/trpc/client";
@@ -32,7 +32,7 @@ export const MessageForm = ({projectId}: Props) => {
     });
 
     const createMessage = useMutation(trpc.messages.create.mutationOptions({
-        onSuccess: (data) => {
+        onSuccess: () => {
             form.reset();
             queryClient.invalidateQueries(trpc.messages.getMany.queryOptions({projectId}),);
             // TODO: Invalidate usage status
