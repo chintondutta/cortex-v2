@@ -2,7 +2,7 @@
 
 import {UserButton} from "@clerk/nextjs";
 import { useCurrentTheme } from "@/hooks/use-current-theme";
-import {dark} from "@clerk/themes";
+import {dark} from "@clerk/ui/themes";
 
 
 interface Props {
@@ -20,7 +20,7 @@ export const UserControl = ({ showName }: Props) => {
                     userButtonAvatarBox: "rounded-md! size-8!",
                     userButtonTrigger: "rounded-md!"
                 },
-                baseTheme: currentTheme === "dark" ? dark : undefined,
+                theme: currentTheme === "dark" ? dark : undefined,
             }}
         />
     );

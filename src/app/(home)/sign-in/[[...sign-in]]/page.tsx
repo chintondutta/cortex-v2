@@ -2,7 +2,7 @@
 
 import { SignIn } from "@clerk/nextjs";
 import {useCurrentTheme} from "@/hooks/use-current-theme";
-import {dark} from "@clerk/themes";
+import {dark} from "@clerk/ui/themes";
 
 const Page = () => {
     const currentTheme = useCurrentTheme();
@@ -12,7 +12,7 @@ const Page = () => {
                 <div className="flex flex-col items-center">
                     <SignIn 
                         appearance={{
-                            baseTheme: currentTheme === "dark" ? dark : undefined,
+                            theme: currentTheme === "dark" ? dark : undefined,
                             elements : {
                                 cardBox: "border! shadow-none! rounded-lg!"
                             }
