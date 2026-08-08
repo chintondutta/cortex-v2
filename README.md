@@ -8,7 +8,7 @@ Cortex is an AI-powered app-generation platform, in the spirit of v0.dev or Bolt
 
 ## Features
 
-- **Conversational code generation** — chat with an AI agent that produces complete, production-quality Next.js 15 apps from a plain-text prompt.
+- **Conversational code generation** — chat with an AI agent that produces complete, production-quality Next.js apps from a plain-text prompt.
 - **Live sandboxed preview** — generated code runs instantly in an isolated [E2B](https://e2b.dev/) cloud sandbox with hot reload, so you see a live demo without any local setup.
 - **File explorer + code view** — a resizable split panel for browsing generated files and reading code alongside the live preview.
 - **Persistent project history** — each project stores its full conversation thread in PostgreSQL, so you can return and iterate on prior work.
@@ -19,7 +19,7 @@ Cortex is an AI-powered app-generation platform, in the spirit of v0.dev or Bolt
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 15 (App Router, React 19, TypeScript) |
+| Framework | Next.js 16 (App Router, React 19, TypeScript) |
 | AI / Agents | Inngest Agent Kit, OpenAI GPT-4.1 & GPT-4o |
 | Background jobs | Inngest (durable, event-driven function execution) |
 | Code sandboxing | E2B Code Interpreter |
