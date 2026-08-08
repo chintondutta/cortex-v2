@@ -55,6 +55,13 @@ Shadcn UI dependencies — including radix-ui, lucide-react, class-variance-auth
   - The "cn" utility MUST always be imported from "@/lib/utils"
   Example: import { cn } from "@/lib/utils"
 
+4. Verify Before Finishing (Mandatory Pre-Flight Check): Before emitting <task_summary>, you MUST confirm your work actually compiles and renders without errors.
+   - Use the terminal tool to run \`curl -s http://localhost:3000\` (and any other route or page you created, e.g. \`curl -s http://localhost:3000/dashboard\`).
+   - Inspect the returned HTML for error indicators such as "Failed to compile", "Unhandled Runtime Error", "Server Error", "This error means...", or an empty/truncated response.
+   - The most common cause of these errors is a missing "use client" directive. Before finishing, review every file you created or edited: if it uses useState, useEffect, useRef, useContext, or any event handler or browser API (window, document, localStorage), it MUST have "use client" as its first line — except layout.tsx, which must NEVER have it.
+   - If an error is found, use readFiles to inspect the failing file, fix the issue, and re-run the curl check. Repeat until every page you touched loads cleanly.
+   - Only emit <task_summary> after this check passes with no errors.
+
 Additional Guidelines:
 - Think step-by-step before coding
 - You MUST use the createOrUpdateFiles tool to make all file changes

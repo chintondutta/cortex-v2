@@ -5,13 +5,13 @@ import TextareaAutosize from "react-textarea-autosize";
 import {z} from "zod";
 import {toast} from "sonner";
 import {ArrowUpIcon, Loader2Icon} from "lucide-react";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {useTRPC} from "@/trpc/client";
 import {Form, FormField} from "@/components/ui/form";
 import { useRouter } from "next/navigation";
-import {useClerk} from "@clerk/nextjs";
+import {useAuth, useClerk} from "@clerk/nextjs";
 import { PROJECT_TEMPLATES } from "../../constants";
 
 const formSchema = z.object({
@@ -22,6 +22,7 @@ export const ProjectForm = () => {
     const router = useRouter();
     const trpc = useTRPC();
     const clerk = useClerk();
+    const { isSignedIn } = useAuth();
     const queryClient = useQueryClient();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -30,11 +31,13 @@ export const ProjectForm = () => {
         },
     });
 
+    const {data: usage} = useQuery(trpc.usage.status.queryOptions(undefined, {enabled: isSignedIn}));
+
     const createProject = useMutation(trpc.projects.create.mutationOptions({
         onSuccess: (data) => {
             queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
+            queryClient.invalidateQueries(trpc.usage.status.queryOptions());
             router.push(`/projects/${data.id}`);
-            // TODO: Invalidate usage status
         },
         onError: (error) => {
             toast.error(error.message);
@@ -53,8 +56,10 @@ export const ProjectForm = () => {
     }
 
     const isPending = createProject.isPending;
-    const isDisabled = isPending || !form.formState.isValid; // Fixed: should be !form.formState.isValid
+    const isOutOfGenerations = usage !== undefined && usage.remaining <= 0;
+    const isDisabled = isPending || !form.formState.isValid || isOutOfGenerations;
     const [isFocussed, setIsFocussed] = useState(false);
+    const showUsage = usage !== undefined;
 
     const handleTemplateClick = (prompt: string) => {
         if (isPending) return;
@@ -64,9 +69,17 @@ export const ProjectForm = () => {
 
     return (
         <Form {...form}>
+            {showUsage && (
+                <div className="flex items-center justify-between rounded-t-xl border border-b-0 bg-sidebar dark:bg-sidebar px-4 py-2 text-xs text-muted-foreground">
+                    <span>
+                        {usage.remaining} of {usage.limit} generations left today
+                    </span>
+                </div>
+            )}
             <form onSubmit={form.handleSubmit(onSubmit)}
                   className={cn("relative border p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all",
                                 isFocussed && "shadow-xs",
+                                showUsage && "rounded-t-none",
 
                   )}
             >
@@ -84,7 +97,7 @@ export const ProjectForm = () => {
                             className="pt-4 resize-none border-none w-full outline-none bg-transparent"
                             placeholder="What would you like to build?"
                             onKeyDown={(e) => {
-                                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                                if (e.key === "Enter" && !e.shiftKey) {
                                     e.preventDefault();
                                     form.handleSubmit(onSubmit)(e);
                                 }
@@ -97,9 +110,14 @@ export const ProjectForm = () => {
                     <div className="text-[10px] text-muted-foreground font-mono">
                        <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounder border bg-muted px-1.5
                        font-mono text-[10px] font-medium text-muted-foreground">
-                        <span>&#8984;</span>Enter
+                        Enter
                        </kbd>
-                       &nbsp;to submit
+                       &nbsp;to submit,&nbsp;
+                       <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounder border bg-muted px-1.5
+                       font-mono text-[10px] font-medium text-muted-foreground">
+                        Shift+Enter
+                       </kbd>
+                       &nbsp;for new line
                     </div>
                     <Button disabled={isDisabled} className={cn("size-8 rounded-full", isDisabled && "bg-muted-foreground border"
 

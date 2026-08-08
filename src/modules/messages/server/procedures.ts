@@ -3,6 +3,7 @@ import {z} from "zod";
 import { prisma } from "@/lib/db";
 import { inngest } from "@/inngest/client";
 import { TRPCError } from "@trpc/server";
+import { assertUnderDailyGenerationLimit } from "@/modules/usage/server/usage";
 export const messagesRouter = createTRPCRouter({
     getMany: protectedProcedure
     .input(
@@ -35,6 +36,8 @@ export const messagesRouter = createTRPCRouter({
         }),
      )
      .mutation (async ({input, ctx}) => {
+        await assertUnderDailyGenerationLimit(ctx.auth.userId);
+
         const existingProject = await prisma.project.findUnique({
             where: {
                 id: input.projectId,

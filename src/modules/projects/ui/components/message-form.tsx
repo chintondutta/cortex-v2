@@ -5,7 +5,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import {z} from "zod";
 import {toast} from "sonner";
 import {ArrowUpIcon, Loader2Icon} from "lucide-react";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {useTRPC} from "@/trpc/client";
@@ -31,11 +31,13 @@ export const MessageForm = ({projectId}: Props) => {
         },
     });
 
+    const {data: usage} = useQuery(trpc.usage.status.queryOptions());
+
     const createMessage = useMutation(trpc.messages.create.mutationOptions({
         onSuccess: () => {
             form.reset();
             queryClient.invalidateQueries(trpc.messages.getMany.queryOptions({projectId}),);
-            // TODO: Invalidate usage status
+            queryClient.invalidateQueries(trpc.usage.status.queryOptions());
         },
         onError: (error) => {
             //TODO: Redirect to pricing page if specific error
@@ -51,12 +53,20 @@ export const MessageForm = ({projectId}: Props) => {
     }
 
     const isPending = createMessage.isPending;
-    const isDisabled = isPending || form.formState.isValid;
+    const isOutOfGenerations = usage !== undefined && usage.remaining <= 0;
+    const isDisabled = isPending || !form.formState.isValid || isOutOfGenerations;
     const [isFocussed, setIsFocussed] = useState(false);
-    const showUsage = false;
+    const showUsage = usage !== undefined;
 
     return (
         <Form {...form}>
+            {showUsage && (
+                <div className="flex items-center justify-between rounded-t-xl border border-b-0 bg-sidebar dark:bg-sidebar px-4 py-2 text-xs text-muted-foreground">
+                    <span>
+                        {usage.remaining} of {usage.limit} generations left today
+                    </span>
+                </div>
+            )}
             <form onSubmit={form.handleSubmit(onSubmit)}
                   className={cn("relative border p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all",
                                 isFocussed && "shadow-xs",
@@ -78,7 +88,7 @@ export const MessageForm = ({projectId}: Props) => {
                             className="pt-4 resize-none border-none w-full outline-none bg-transparent"
                             placeholder="What would you like to build?"
                             onKeyDown={(e) => {
-                                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                                if (e.key === "Enter" && !e.shiftKey) {
                                     e.preventDefault();
                                     form.handleSubmit(onSubmit)(e);
                                 }
@@ -91,9 +101,14 @@ export const MessageForm = ({projectId}: Props) => {
                     <div className="text-[10px] text-muted-foreground font-mono">
                        <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounder border bg-muted px-1.5
                        font-mono text-[10px] font-medium text-muted-foreground">
-                        <span>&#8984;</span>Enter
+                        Enter
                        </kbd>
-                       &nbsp;to submit
+                       &nbsp;to submit,&nbsp;
+                       <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounder border bg-muted px-1.5
+                       font-mono text-[10px] font-medium text-muted-foreground">
+                        Shift+Enter
+                       </kbd>
+                       &nbsp;for new line
                     </div>
                     <Button disabled={isDisabled} className={cn("size-8 rounded-full", isDisabled && "bg-muted-foreground border"
 

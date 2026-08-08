@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { inngest } from "@/inngest/client";
 import {generateSlug} from "random-word-slugs";
 import { TRPCError } from "@trpc/server";
+import { assertUnderDailyGenerationLimit } from "@/modules/usage/server/usage";
 
 
 export const projectsRouter = createTRPCRouter({
@@ -42,6 +43,8 @@ export const projectsRouter = createTRPCRouter({
         }),
      )
      .mutation (async ({input, ctx}) => {
+        await assertUnderDailyGenerationLimit(ctx.auth.userId);
+
         const createdProject = await prisma.project.create({
             data: {
                 userId: ctx.auth.userId,
